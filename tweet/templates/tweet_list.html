@@ -1,0 +1,59 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Adds
+{% endblock %}
+
+{% block content %}
+<h1 class='text-center mt-4'>Welcome to Django Project</h1>
+
+<a class='btn btn-primary' href="{% url 'tweet_create' %}">Create Add</a>
+<br><br>
+
+<div class="container d-flex flex-wrap gap-3">
+
+  {% for tweet in tweets %}
+    <div class="card" style="width: 18rem; height: 22rem; overflow:hidden;">
+      
+      {% if tweet.photo %}
+      <img src="{{ tweet.photo.url }}" class="card-img-top" alt="Tweet Image" style="height:150px; ">
+      {% endif %}
+
+      <div class="card-body">
+
+        <h5 class="card-title">{{ tweet.user.username }}</h5>
+        
+        <p class="card-text">{{ tweet.text|truncatechars:50}}</p>
+
+        <!-- Like Button -->
+        {% if tweet.id in liked_tweets %}
+            <a href="{% url 'like_tweet' tweet.id %}" class="btn btn-primary btn-sm">Dislike</a>
+        {% else %}
+            <a href="{% url 'like_tweet' tweet.id %}" class="btn btn-primary btn-sm">Like</a>
+        {% endif %}
+
+        <!-- Like Count -->
+          <span class="badge bg-info text-dark">
+            {{ tweet.likes.count }} Likes
+          </span>
+
+
+        <!-- Comment Section -->
+        <a href="{% url 'view_comments' tweet.id %}" class="btn btn-secondary btn-sm mt-2">
+          💬 Comments ({{ tweet.comments.count }})
+        </a>
+
+<br>
+        <!-- Edit & Delete -->
+        {% if tweet.user == user %}
+          <a href="{% url 'tweet_edit' tweet.id %}" class="btn btn-warning btn-sm mt-2">Edit</a>
+          <a href="{% url 'tweet_delete' tweet.id %}" class="btn btn-danger btn-sm mt-2">Delete</a>
+        {% endif %}
+
+      </div>
+    </div>
+  {% endfor %}
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<h2 class="mt-3">Comments for: "{{ tweet.text|truncatechars:50 }}"</h2>
+
+<a href="{% url 'tweet_list' %}" class="btn btn-secondary btn-sm mt-2">⬅ Back</a>
+
+<hr>
+
+<!-- Show All Comments -->
+<div class="mt-3">
+  {% for c in comments %}
+    <div class="border rounded p-2 mb-2 bg-light">
+
+      <!-- Username -->
+      <strong>
+        {% if c.user %}
+            {{ c.user.username }}
+        {% else %}
+            Guest
+        {% endif %}
+      </strong>
+
+      <!-- Time -->
+      <small class="text-muted"> • {{ c.created_at|timesince }} ago</small>
+
+      <p class="mt-1">{{ c.text }}</p>
+
+    </div>
+  {% empty %}
+    <p class="text-muted">No comments yet.</p>
+  {% endfor %}
+</div>
+
+<hr>
+
+<!-- Add Comment Form -->
+<h4>Add a Comment</h4>
+
+<form method="POST" action="{% url 'comment_tweet' tweet.id %}">
+  {% csrf_token %}
+  <textarea name="comment" class="form-control" placeholder="Write your comment..." required></textarea>
+  <button class="btn btn-primary mt-2">Post Comment</button>
+</form>
+
+{% endblock %}
