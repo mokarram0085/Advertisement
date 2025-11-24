@@ -11,4 +11,9 @@ urlpatterns = [
     path('<int:tweet_id>/comment/', views.comment_tweet, name='comment_tweet'),
     path('<int:tweet_id>/comments/', views.view_comments, name='view_comments'),
 
+    path('your_profile/', views.your_profile, name='your_profile'),
+    path('edit-profile-pic/', views.edit_profile_pic, name='edit_profile_pic'),
+    path('edit-username/', views.edit_username, name='edit_username'),
+    path('edit-password/', views.edit_password, name='edit_password'),
+
 ]

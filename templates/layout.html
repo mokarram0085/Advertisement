@@ -7,18 +7,27 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
 
     <title>
-        {% block title %} chai aur django {% endblock %}
+        {% block title %} Advertisement {% endblock %}
     </title>
+
+    <style>
+      body {
+        padding-top: 80px;
+      }
+    </style>
+
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+  <nav class="navbar navbar-expand-lg bg-body-tertiary fixed-top">
   <div class="container-fluid">
-    <a class="navbar-brand" href="#">Add_bar</a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <a class='btn btn-primary' href="{% url 'tweet_create' %}">Create Add</a>
+        <!--
         <li class="nav-item">
           <a class="nav-link active" aria-current="page" href="#">Home</a>
         </li>
@@ -39,10 +48,11 @@
         <li class="nav-item">
           <a class="nav-link disabled" aria-disabled="true">Disabled</a>
         </li>
+      -->
       </ul>
+      
       <form class="d-flex" role="search" method="GET" action="{% url 'tweet_list' %}">
-          <input class="form-control me-2" type="search" name="q" placeholder="Search tweets..."
-          value="{{ request.GET.q }}">
+          <input class="form-control me-2" type="search" name="q" placeholder="Search adds..."value="{{ request.GET.q }}">
           <button class="btn btn-outline-success" type="submit">Search</button>
       </form>
 
@@ -57,6 +67,24 @@
         <a href="{% url 'register' %}" class='btn btn-primary mx-2'>Register</a>
         <a href="{% url 'login' %}" class='btn btn-primary mx-2'>Login</a>
       {% endif %}   
+      
+      {% if user.is_authenticated %}
+        <a href="{% url 'your_profile' %}" 
+          class="btn btn-light mx-2 shadow-sm d-flex align-items-center gap-2"
+          style="border-radius: 50px; padding: 6px 14px;">
+            
+            <!-- Small circular profile image -->
+            <img src="{{ user.userprofile.profile_photo.url }}"
+                class="rounded-circle border border-2"
+                style="width: 40px; height: 40px; object-fit: cover;"
+                alt="Profile Photo">
+
+            <span class="fw-semibold text-primary">Your Profile</span>
+        </a>
+      {% endif %}
+
+
+
 
     </div>
   </div>

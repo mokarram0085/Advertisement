@@ -26,7 +26,12 @@ SECRET_KEY = 'django-insecure-^4nk8h(fqc-8&cwp)1^-+ncoc@4wiilpjypg!=q%7-db_*s-8b
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'mokarram0085.pythonanywhere.com',
+    'localhost',
+    '127.0.0.1'
+]
+
 
 
 # Application definition
@@ -39,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'tweet',
+    'widget_tweaks',
 ]
 
 MIDDLEWARE = [
@@ -132,5 +138,5 @@ STATIC_URL = '/static/'   #URL to access static files
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]  #Folder where static files are located (for development)
 
 LOGIN_URL= '/accounts/login/'  #If someone tries to open /tweet/ without logging in, Django redirects them to /accounts/login.
-LOGIN_REDIRECT_URL='/tweet/'  #After successfully logging in, Django sends the user to this URL.
-LOGOUT_REDIRECT_URL='/tweet/' #After logging out, Django redirects the user to /tweet/.
+LOGIN_REDIRECT_URL='/'  #After successfully logging in, Django sends the user to this URL.
+LOGOUT_REDIRECT_URL='/' #After loggout, Django redirects the user to /tweet/.

@@ -23,8 +23,8 @@ from . import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.home),
-    path('tweet/', include('tweet.urls')),
+    # path('', views.home),
+    path('', include('tweet.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
 
 ]+static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)

@@ -1,0 +1,13 @@
+{% extends 'layout.html' %}
+{% block content %}
+
+<div class="container mt-4">
+    <h2>Edit Username</h2>
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button class="btn btn-warning">Update Username</button>
+    </form>
+</div>
+
+{% endblock %}
