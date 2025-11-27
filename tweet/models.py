@@ -38,7 +38,8 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     profile_photo = models.ImageField(
         upload_to='profile_pics/',
-        default='media/photos/Screenshot_2025-08-03_102037.png'
+        default='photos/man1.webp',
+        blank=True, null=True
     )
 
     def __str__(self):
@@ -46,16 +47,10 @@ class UserProfile(models.Model):
 
 
 @receiver(post_save, sender=User)
-def create_or_update_user_profile(sender, instance, created, **kwargs):
+def create_user_profile(sender, instance, created, **kwargs):
     if created:
-        # create profile for new users
         UserProfile.objects.create(user=instance)
-    else:
-        # ensure existing users always have a profile
-        UserProfile.objects.get_or_create(user=instance)
-        instance.userprofile.save()
-
 
 @receiver(post_save, sender=User)
-def save_profile(sender, instance, **kwargs):
+def save_user_profile(sender, instance, **kwargs):
     instance.userprofile.save()

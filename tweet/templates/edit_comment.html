@@ -1,0 +1,30 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="container mt-5" style="max-width: 550px;">
+    <div class="card shadow-sm border-0">
+        <div class="card-body">
+            <h3 class="mb-4 fw-semibold text-primary">Edit Your Comment</h3>
+
+            <form method="POST">
+                {% csrf_token %}
+
+                <label class="form-label fw-semibold">Comment</label>
+                <textarea 
+                    name="comment" 
+                    class="form-control rounded-3" 
+                    rows="4" 
+                    required>{{ comment.text|default_if_none:"" }}</textarea>
+
+                <div class="mt-4 d-flex justify-content-between">
+                    <button class="btn btn-primary px-4">Save</button>
+                    <a href="{% url 'view_comments' comment.tweet.id %}" class="btn btn-outline-secondary px-4">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

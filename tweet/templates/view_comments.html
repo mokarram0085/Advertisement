@@ -3,82 +3,223 @@
 {% block content %}
 
 <style>
-    /* Comment Card Hover */
-    .comment-card {
-        background: #f8f9fa;
-        border-left: 5px solid #0d6efd;
-        border-radius: 12px;
-        padding: 18px;
-        transition: 0.2s;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-    }
+body {
+    background: #eef2f7;
+    font-family: "Poppins", sans-serif;
+}
 
-    .comment-card:hover {
-        transform: scale(1.01);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
+/* BACK BUTTON */
+.back-btn-outside {
+    position: fixed;
+    top:100px;
+    left: 40px;
+    z-index: 9999;
+}
 
-    .add-comment-box {
-        background: #ffffff;
-        padding: 20px;
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
+.back-btn-outside a {
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-weight: 500;
+    background: white;
+    border: 1px solid #ccc;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    transition: 0.2s;
+}
+
+.back-btn-outside a:hover {
+    transform: translateX(-4px);
+    background: #f1f1f1;
+}
+
+/* MAIN CARD WRAPPER */
+.main-card {
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    max-width: 650px;
+    margin: 20px auto 60px;
+    padding: 25px 30px;
+}
+
+/* PAGE TITLE */
+.page-heading {
+    font-size: 30px;
+    font-weight: 900;
+    text-align: center;
+    margin-bottom: 30px;
+    letter-spacing: 1px;
+}
+
+.page-heading span {
+    background: linear-gradient(90deg, #0066ff, #00d2ff, #00ff99);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* TWEET CARD */
+/* TWEET CARD */
+.tweet-card-inner {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 18px;
+    display: flex;
+    gap: 18px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    margin-bottom: 30px;
+    transition: 0.25s;
+}
+
+.tweet-card-inner:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+}
+
+/* MEDIUM-SIZED IMAGE */
+.tweet-card-inner img.tweet-image {
+    width: 150px;
+    height: 150px;
+    border-radius: 14px;
+    object-fit: cover;
+    border: 2px solid #e2e6ea;
+}
+
+/* TEXT + USERNAME */
+.tweet-card-body-inner {
+    flex: 1;
+}
+
+.tweet-username {
+    font-size: 18px;
+    font-weight: 800;
+    margin-bottom: 6px;
+}
+
+.tweet-text {
+    color: #333;
+    font-size: 15px;
+    margin-bottom: 10px;
+}
+
+/* COMMENT CARD */
+.comment-card {
+    background: #fafbfc;
+    border-left: 5px solid #0d6efd;
+    border-radius: 14px;
+    padding: 15px 18px;
+    margin-bottom: 18px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    transition: .2s;
+}
+
+.comment-card:hover {
+    transform: scale(1.01);
+}
+
+.username {
+    font-weight: bold;
+    color: #0d6efd;
+}
+
+.comment-text {
+    margin-top: 10px;
+    font-size: 15px;
+    color: #444;
+}
+
+/* ADD COMMENT BOX */
+.add-comment-box {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 14px;
+    margin-top: 25px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.07);
+}
+
+.add-comment-box textarea {
+    border-radius: 10px !important;
+}
+
+.add-comment-box button {
+    border-radius: 10px;
+}
+
 </style>
 
-<!-- Page Title -->
-<h2 class="mt-4 fw-bold text-primary">
-  Comments for: "<span class="text-dark">{{tweet.user.username}}</span>"
-</h2>
 
-<!-- Back Button -->
-<a href="{% url 'tweet_list' %}" class="btn btn-outline-secondary btn-sm mt-3">
-  ⬅ Back
-</a>
-
-<!-- Comment List -->
-<div class="mt-4">
-
-  {% for c in comments %}
-    <div class="comment-card mb-3">
-
-      <!-- Username + Time -->
-      <div class="d-flex justify-content-between">
-          <strong class="text-primary">
-            {% if c.user %}
-                {{ c.user.username }}
-            {% else %}
-                Guest
-            {% endif %}
-          </strong>
-
-          <small class="text-muted">
-              {{ c.created_at|timesince }} ago
-          </small>
-      </div>
-
-      <!-- Comment Text -->
-      <p class="mt-2 mb-0">{{ c.text }}</p>
-
-    </div>
-  {% empty %}
-    <p class="text-muted mt-3">No comments yet.</p>
-  {% endfor %}
-
+<!-- 🔙 BACK BUTTON -->
+<div class="back-btn-outside">
+    <a href="{% url 'tweet_list' %}" class="btn btn-outline-secondary">⬅ Back</a>
 </div>
 
-<!-- Add Comment Section -->
-<div class="mt-5 add-comment-box">
-  <h4 class="fw-bold mb-3">Add a Comment</h4>
 
-  <form method="POST" action="{% url 'comment_tweet' tweet.id %}">
-    {% csrf_token %}
+<div class="main-card">
 
-    <textarea name="comment" class="form-control rounded-3 shadow-sm"
-      placeholder="Write your comment..." rows="3" required></textarea>
+    <!-- TITLE -->
+    <h2 class="page-heading">Comments for: <span>{{ tweet.user.username }}</span></h2>
 
-    <button class="btn btn-primary mt-3 px-4">Post Comment</button>
-  </form>
+    <!-- Add CARD -->
+    <div class="tweet-card-inner">
+        {% if tweet.photo %}
+            <img class="tweet-image" src="{{ tweet.photo.url }}">
+        {% endif %}
+
+        <div class="tweet-card-body-inner">
+            <h5 class="tweet-username">{{ tweet.user.username }}</h5>
+            <p class="tweet-text">{{ tweet.text }}</p>
+
+            <div class="tweet-actions d-flex align-items-center gap-2 mt-2">
+                {% if liked %}
+                    <a href="{% url 'like_tweet' tweet.id %}" class="btn btn-danger btn-sm">Dislike</a>
+                {% else %}
+                    <a href="{% url 'like_tweet' tweet.id %}" class="btn btn-primary btn-sm">Like</a>
+                {% endif %}
+
+                <span class="badge bg-info text-dark">{{ tweet.likes.count }} Likes</span>
+
+                <a class="btn btn-secondary btn-sm">
+                    💬 Comments ({{ tweet.comments.count }})
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- COMMENTS LIST -->
+    {% for c in comments %}
+    <div class="comment-card">
+        <div class="d-flex justify-content-between">
+            <strong class="username">{{ c.user.username }}</strong>
+            <small class="text-muted">{{ c.created_at|timesince }} ago</small>
+        </div>
+
+        <p class="comment-text">{{ c.text }}</p>
+
+        {% if c.user == request.user %}
+        <div class="d-flex gap-2 mt-2">
+            <a href="{% url 'edit_comment' c.id %}" class="btn btn-warning btn-sm px-3">✏ Edit</a>
+
+            <a href="{% url 'delete_comment' c.id %}" 
+               class="btn btn-danger btn-sm px-3"
+               onclick="return confirm('Delete this comment?');">
+               🗑 Delete
+            </a>
+        </div>
+        {% endif %}
+    </div>
+    {% empty %}
+    <p class="text-muted mt-3">No comments yet.</p>
+    {% endfor %}
+
+
+    <!-- ADD COMMENT -->
+    <div class="add-comment-box">
+        <h4 class="fw-bold mb-3">Add a Comment</h4>
+        <form method="POST" action="{% url 'comment_tweet' tweet.id %}">
+            {% csrf_token %}
+            <textarea name="comment" class="form-control shadow-sm" rows="3" required></textarea>
+            <button class="btn btn-primary mt-3">Post Comment</button>
+        </form>
+    </div>
+
 </div>
 
 {% endblock %}

@@ -5,13 +5,61 @@
 {% block content %}
 
 {% load static %}
+<style>
+    /* Buttons Container */
+.container.text-center.mt-4 {
+display: flex;
+justify-content: center;
+gap: 15px;
+flex-wrap: wrap;
+}
+
+/* Force all buttons to same height */
+.container.text-center.mt-4 a.btn {
+display: flex;
+align-items: center;
+justify-content: center;
+height: 60px;          /* fixed height for all buttons */
+padding: 0 15px;
+gap: 8px;              /* space between image and text */
+text-align: center;
+white-space: nowrap;
+}
+
+/* Profile image inside button */
+.container.text-center.mt-4 a.btn img {
+width: 40px;
+height: 40px;
+object-fit: cover;
+border-radius: 50%;
+border: 2px solid #fff;
+}
+
+/* Optional: responsive stacking */
+@media (max-width: 576px) {
+.container.text-center.mt-4 {
+flex-direction: column;
+align-items: center;
+}
+.container.text-center.mt-4 a.btn {
+width: 100%;
+}
+}
+
+</style>
 
 <link rel="stylesheet" href="{% static 'style.css' %}">
 
 
 <div class="container text-center mt-4">
 
-    <a href="{% url 'edit_profile_pic' %}" class="btn btn-primary btn-lg mx-2">Edit Profile Picture</a>
+    <a href="{% url 'edit_profile_pic' %}" class="btn btn-primary btn-lg mx-2">
+        
+        <img src="{{ user.userprofile.profile_photo.url }}"
+                class="rounded-circle border border-2"
+                style="width: 40px; height: 40px; object-fit: cover;"
+                alt="Profile Photo">
+        Edit Profile Picture</a>
     <a href="{% url 'edit_username' %}" class="btn btn-warning btn-lg mx-2">Edit Username</a>
     <a href="{% url 'edit_password' %}" class="btn btn-danger btn-lg mx-2">Edit Password</a>
 

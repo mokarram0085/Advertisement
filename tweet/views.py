@@ -4,20 +4,15 @@ from django.contrib.auth import login
 from django.db.models import Q
 from django.core.paginator import Paginator
 from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth.models import User
 
 from .models import Tweet, Like, Comment
-from .forms import (
-    TweetForm,
-    UserRegistrationForm,
-    ProfilePicForm,
-    UsernameForm
-)
+from .forms import TweetForm,UserRegistrationForm,ProfilePicForm,UsernameForm
 
+from django.http import HttpResponseForbidden
 
-
-
-def index(request):
-    return render(request, 'index.html')
+def About_Us(request):
+    return render(request,'About_Us.html')
 
 def tweet_list(request):
     query = (request.GET.get("q", "")).strip()
@@ -62,32 +57,75 @@ def like_tweet(request, tweet_id):
     else:
         Like.objects.create(tweet=tweet, session_id=session_id)  # LIKE
 
-    return redirect('tweet_list')
+# 🔥 Redirect back to the same page(url)
+    return redirect(request.META.get('HTTP_REFERER', 'tweet_list'))
 
 
 def comment_tweet(request, tweet_id):
     tweet = get_object_or_404(Tweet, id=tweet_id)
-    text = request.POST.get("comment")
 
-    if text.strip():
-        session_id = request.session.session_key
-        if not session_id:
-            request.session.create()
+    if request.method == "POST":
+        text = request.POST.get("comment", "").strip()
+
+        if text:
             session_id = request.session.session_key
+            if not session_id:
+                request.session.create()
+                session_id = request.session.session_key
 
-        if request.user.is_authenticated:
-            Comment.objects.create(tweet=tweet, user=request.user, text=text)
-        else:
-            Comment.objects.create(tweet=tweet, session_id=session_id, text=text)
+            if request.user.is_authenticated:
+                Comment.objects.create(tweet=tweet, user=request.user, text=text)
+            # else:
+            #     Comment.objects.create(tweet=tweet, session_id=session_id, text=text)
 
-    return redirect('tweet_list')
+        return redirect('view_comments', tweet_id=tweet_id)
+
+    return redirect('view_comments', tweet_id=tweet_id)
+
 
 def view_comments(request, tweet_id):
     tweet = get_object_or_404(Tweet, id=tweet_id)
     comments = tweet.comments.all().order_by('-created_at')
 
-    return render(request, "view_comments.html", { "tweet": tweet, "comments": comments})
+    # Session-based likes
+    session_id = request.session.session_key
+    if not session_id:
+        request.session.create()
+        session_id = request.session.session_key
 
+    liked = Like.objects.filter(tweet=tweet, session_id=session_id).exists()
+
+    return render(request, "view_comments.html", { 
+        "tweet": tweet, 
+        "comments": comments,
+        "liked": liked  
+    })
+
+@login_required
+def edit_comment(request, comment_id):
+    comment = get_object_or_404(Comment, id=comment_id)
+
+    # Only owner can edit
+    if comment.user != request.user:
+        return HttpResponseForbidden("You cannot edit this comment.")
+
+    if request.method == "POST":
+        new_text = request.POST.get("comment")
+        comment.text = new_text
+        comment.save()
+        return redirect("view_comments", tweet_id=comment.tweet.id)
+    return render(request, "edit_comment.html", {"comment": comment})
+
+@login_required
+def delete_comment(request, comment_id):
+    comment = get_object_or_404(Comment, id=comment_id)
+
+    if comment.user != request.user:
+        return HttpResponseForbidden("You cannot delete this comment.")
+
+    tweet_id = comment.tweet.id
+    comment.delete()
+    return redirect("view_comments", tweet_id=tweet_id)
 
 @login_required
 def tweet_create(request):
@@ -125,23 +163,34 @@ def tweet_delete(request,tweet_id):
     return render(request,'tweet_confirm_delete.html',{'tweet':tweet})
 
 def register(request):
-    if request.method=='POST':
-        form=UserRegistrationForm(request.POST)
+    if request.method == "POST":
+        form = UserRegistrationForm(request.POST)
         if form.is_valid():
-            user =form.save(commit=False)
-            user.set_password(form.cleaned_data['password1'])
-            user.save()
-            login(request,user)
-            return redirect('tweet_list')
+            user = form.save()  # triggers post_save signal
+            return redirect('login')  # send user to login page
     else:
         form = UserRegistrationForm()
-    return render(request,'registration/register.html',{'form':form})
+    return render(request, 'registration/register.html', {'form': form})
+
 
 
 @login_required
 def your_profile(request):
     tweets = Tweet.objects.filter(user=request.user).order_by('-id')
-    return render(request, 'your_profile.html', {'tweets': tweets})
+
+    session_id = request.session.session_key
+    if not session_id:
+        request.session.create()
+        session_id = request.session.session_key
+
+    # List of tweet IDs liked by this session
+    liked_tweets = Like.objects.filter(session_id=session_id).values_list('tweet_id', flat=True)
+
+    return render(request, 'your_profile.html', {
+        'tweets': tweets,
+        'liked_tweets': liked_tweets
+    })
+
 
 @login_required
 def edit_profile_pic(request):
@@ -180,3 +229,21 @@ def edit_password(request):
             return redirect('login')
 
     return render(request, 'edit_password.html', {'form': form})
+
+def view_user_profile(request, user_id):
+    user_obj = get_object_or_404(User, id=user_id)
+    tweets = Tweet.objects.filter(user=user_obj).order_by('-created_at')
+
+    # --- Likes Work ---
+    session_id = request.session.session_key
+    if not session_id:
+        request.session.create()
+        session_id = request.session.session_key
+
+    liked_tweets = Like.objects.filter(session_id=session_id).values_list("tweet_id", flat=True)
+
+    return render(request, 'view_user_profile.html', {
+        'profile_user': user_obj,
+        'tweets': tweets,
+        'liked_tweets': liked_tweets,
+    })

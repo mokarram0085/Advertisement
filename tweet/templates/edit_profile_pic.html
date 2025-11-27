@@ -1,6 +1,84 @@
 {% extends 'layout.html' %}
 {% block content %}
 
+<style>
+/* Edit Profile Picture Page Container */
+.container.mt-4 {
+max-width: 500px;
+background: #ffffff;
+padding: 30px 25px;
+border-radius: 15px;
+box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+margin-top: 50px;
+}
+
+/* Heading */
+.container.mt-4 h2 {
+text-align: center;
+font-weight: 700;
+margin-bottom: 25px;
+color: #333;
+}
+
+/* Form Inputs */
+.container.mt-4 form input[type="file"] {
+width: 100%;
+padding: 8px 12px;
+margin-bottom: 15px;
+border-radius: 8px;
+border: 1px solid #ccc;
+transition: all 0.3s ease;
+}
+
+.container.mt-4 form input[type="file"]:hover,
+.container.mt-4 form input[type="file"]:focus {
+border-color: #0066ff;
+box-shadow: 0 0 5px rgba(0,102,255,0.3);
+outline: none;
+}
+
+/* Submit Button */
+.container.mt-4 form button.btn-primary {
+width: 100%;
+padding: 12px;
+border-radius: 10px;
+font-weight: 600;
+background: linear-gradient(90deg, #0066ff, #00d2ff);
+border: none;
+color: #fff;
+transition: all 0.3s ease;
+}
+
+.container.mt-4 form button.btn-primary:hover {
+transform: scale(1.05);
+box-shadow: 0 4px 15px rgba(0,102,255,0.3);
+}
+
+/* Highlight Errors (reuse from previous) */
+.container.mt-4 .errorlist {
+background: #ffe6e6;
+border-left: 4px solid #ff4d4d;
+color: #c0392b;
+padding: 10px 15px;
+margin-bottom: 15px;
+border-radius: 8px;
+font-weight: 600;
+}
+
+.container.mt-4 input:invalid {
+border-color: #ff4d4d;
+box-shadow: 0 0 5px rgba(255,77,77,0.3);
+}
+
+.container.mt-4 .error-text {
+color: #c0392b;
+font-size: 0.9rem;
+margin-top: 3px;
+}
+
+</style>
+
+
 <div class="container mt-4">
     <h2>Edit Profile Picture</h2>
     <form method="POST" enctype="multipart/form-data">
