@@ -25,7 +25,17 @@ urlpatterns = [
 
     path('profile/<int:user_id>/', views.view_user_profile, name='view_user_profile'),
 
-    # COMMENT EDIT/DELETE (these must stay at bottom)
+    # COMMENT EDIT/DELETE 
     path('comments/<int:comment_id>/edit/', views.edit_comment, name='edit_comment'),
     path('comments/<int:comment_id>/delete/', views.delete_comment, name='delete_comment'),
+
+    # Open one card
+    path('tweet_detail/<int:id>/', views.tweet_detail, name='tweet_detail'),
+
+    # order URLs
+    path('order_now/<int:tweet_id>/', views.order_now, name='order_now'),
+    path("order_success/<int:order_id>/", views.order_success, name="order_success"),
+    path('all_orders/', views.all_orders, name='all_orders'),
+
+
 ]

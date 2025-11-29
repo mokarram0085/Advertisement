@@ -6,10 +6,12 @@ from django.core.paginator import Paginator
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.models import User
 
-from .models import Tweet, Like, Comment
-from .forms import TweetForm,UserRegistrationForm,ProfilePicForm,UsernameForm
+from .models import Tweet, Like, Comment,Order
+from .forms import TweetForm,UserRegistrationForm,ProfilePicForm,UsernameForm,OrderForm
 
 from django.http import HttpResponseForbidden
+from django.contrib import messages
+
 
 def About_Us(request):
     return render(request,'About_Us.html')
@@ -167,6 +169,7 @@ def register(request):
         form = UserRegistrationForm(request.POST)
         if form.is_valid():
             user = form.save()  # triggers post_save signal
+            messages.success(request, "Account successfully created! You can now login.")
             return redirect('login')  # send user to login page
     else:
         form = UserRegistrationForm()
@@ -247,3 +250,44 @@ def view_user_profile(request, user_id):
         'tweets': tweets,
         'liked_tweets': liked_tweets,
     })
+
+# Open one tweet
+def tweet_detail(request, id):
+    tweet = get_object_or_404(Tweet, id=id)
+    return render(request, 'tweet_detail.html', {'tweet': tweet})
+
+#order_now
+@login_required
+def order_now(request, tweet_id):
+    tweet = get_object_or_404(Tweet, id=tweet_id)
+
+    if request.method == "POST":
+        name = request.POST.get("name")
+        phone = request.POST.get("phone")
+        pin = request.POST.get("pin")
+        address = request.POST.get("address")
+
+        order = Order.objects.create(
+            user=request.user,
+            tweet=tweet,
+            name=name,
+            phone=phone,
+            pin=pin,
+            address=address
+        )
+
+        return redirect("order_success", order_id=order.id)
+
+    return render(request, "order_now.html", {"order": tweet})
+
+
+def order_success(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    return render(request, 'order_success.html', {"order": order})
+
+
+
+@login_required
+def all_orders(request):
+    orders = Order.objects.select_related('user', 'tweet').order_by('-created_at')
+    return render(request, 'all_orders.html', {'orders': orders})

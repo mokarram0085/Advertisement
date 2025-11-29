@@ -8,8 +8,6 @@
 
 <link rel="stylesheet" href="{% static 'style.css' %}">
 
-
-
 <h1 class="page-title">
     {% if user.is_authenticated %}
         <span class="title-text">Welcome back, {{ user.username }}</span>
@@ -27,63 +25,81 @@
     {% endif %}
 
     {% for tweet in tweets %}
-        <div class="ad-card">
+    
+        <div class="ad-card" onclick="window.location.href='{% url 'tweet_detail' tweet.id %}'">
 
+<!-- event.stopPropagation() : is used so that button clicks DO NOT trigger the card click event.
+# Without stopPropagation:
+    Card clicked → open detail page  
+    Button clicked → also open detail page (bad)
+
+# With stopPropagation:
+    Button clicked → only button action  
+    Card clicked → open detail page
+-->
             {% if tweet.photo %}
                 <img src="{{ tweet.photo.url }}" class="ad-img" alt="Ad Image">
             {% endif %}
 
             <div class="card-body">
-                    <div class="d-flex align-items-center gap-2">
+                <div class="d-flex align-items-center gap-2">
 
-                        <a href="{% url 'view_user_profile' tweet.user.id %}">
-                            <img src="{% if tweet.user.userprofile.profile_photo %}
+                    <a href="{% url 'view_user_profile' tweet.user.id %}">
+                        <img src="{% if tweet.user.userprofile.profile_photo %}
                                         {{ tweet.user.userprofile.profile_photo.url }}
                                     {% else %}
                                         {% static 'images/default_profile.png' %}
                                     {% endif %}"
-                                class="rounded-circle border border-2"
-                                width="40" height="40">
-                        </a>
+                            class="rounded-circle border border-2"
+                            width="40" height="40">
+                    </a>
 
-                        <h5 class="card-title mb-0">
-                            {{ tweet.user.username|truncatechars:20 }}
-                        </h5>
+                    <h5 class="card-title mb-0">
+                        {{ tweet.user.username|truncatechars:20 }}
+                    </h5>
 
-                    </div>
-
-              
-                <p class="card-text">{{ tweet.text|truncatechars:60 }}</p>
+                </div>
+                <p class="card-title mb-0">{{ tweet.title|truncatechars:20 }}</p>
+                <p class="card-text">{{ tweet.text|truncatechars:30 }}</p>
 
                 <div class="d-flex align-items-center mt-2" style="gap: 12px;">
-                  <!-- LIKE + COUNT -->
-                  {% if tweet.id in liked_tweets %}
-                      <a href="{% url 'like_tweet' tweet.id %}" class="btn btn-danger btn-sm">Dislike</a>
-                  {% else %}
-                      <a href="{% url 'like_tweet' tweet.id %}" class="btn btn-primary btn-sm">Like</a>
-                  {% endif %}
 
-                  <!-- LIKE + COUNT -->
-                  <span class="badge bg-info text-dark">
-                      {{ tweet.likes.count }} Likes
-                  </span>
-              
-                  <!-- COMMENTS -->
-                  {% if user.is_authenticated %}
-                  <a href="{% url 'view_comments' tweet.id %}" class="btn btn-secondary btn-sm">
-                      💬 Comments ({{ tweet.comments.count }})
-                  </a>
-                  {%endif%}
-              </div>
+                    <!-- LIKE BUTTON -->
+                    {% if tweet.id in liked_tweets %}
+                        <a href="{% url 'like_tweet' tweet.id %}" class="btn btn-danger btn-sm">Dislike</a>
+                    {% else %}
+                        <a href="{% url 'like_tweet' tweet.id %}" class="btn btn-primary btn-sm">Like</a>
+                    {% endif %}
+
+                    <!-- LIKE COUNT -->
+                    <span class="badge bg-info text-dark">
+                        {{ tweet.likes.count }} Likes
+                    </span>
+
+                    <!-- COMMENTS -->
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'view_comments' tweet.id %}" class="btn btn-secondary btn-sm">
+                        💬 Comments ({{ tweet.comments.count }})
+                    </a>
+                    {% endif %}
+
+
+                </div>
 
                 <!-- EDIT/DELETE FOR OWNER -->
-                {% if tweet.user == user %}
-                    <div class="mt-3 d-flex" style="gap: 150px;">
+                <div class="mt-3 d-flex" style="gap: 30px;">
+                    {% if tweet.user == user %}
                         <a href="{% url 'tweet_edit' tweet.id %}" class="btn btn-warning btn-sm">Edit</a>
                         <a href="{% url 'tweet_delete' tweet.id %}" class="btn btn-danger btn-sm">Delete</a>
-                    </div>
+                    {% endif %}
 
-                {% endif %}
+                    <!-- SHARE BUTTON (everyone can see) -->
+                    <button class="btn btn-dark btn-sm"
+                        onclick="sharePost('{{ request.build_absolute_uri }}tweet/{{ tweet.id }}/')">
+                        🔗 Share
+                    </button>
+                </div>
+
             </div>
 
         </div>
@@ -91,6 +107,7 @@
 
 </div>
 
+<!-- pagination -->
 <div class="d-flex justify-content-center mt-4">
     <nav>
         <ul class="pagination">
@@ -120,5 +137,20 @@
         </ul>
     </nav>
 </div>
+
+<!-- SHARE FUNCTION -->
+<script>
+function sharePost(url) {
+    if (navigator.share) {
+        navigator.share({
+            title: "Check this Ad",
+            url: url
+        });
+    } else {
+        navigator.clipboard.writeText(url);
+        alert("Link copied! (Sharing not supported)");
+    }
+}
+</script>
 
 {% endblock %}

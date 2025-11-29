@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+{% block content %}
+<div style="max-width:600px; margin:80px auto; text-align:center;">
+    <h2 style="color:green;">🎉 Order Placed Successfully!</h2>
+
+    <h4>{{ order.tweet.title }}</h4>
+
+    {% if order.tweet.photo %}
+      <img src="{{ order.tweet.photo.url }}" style="max-width:200px; border-radius:8px; margin-top:10px;">
+    {% endif %}
+
+    <p>Thank you for ordering. We will contact you soon.</p>
+
+    <a href="{% url 'tweet_list' %}" class="btn btn-primary mt-3">Go Back Home</a>
+</div>
+{% endblock %}

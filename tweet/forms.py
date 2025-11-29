@@ -1,12 +1,13 @@
 from django import forms
-from .models import Tweet, UserProfile
+from .models import Tweet, UserProfile,Order
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+
 
 class TweetForm(forms.ModelForm):
     class Meta:
         model = Tweet
-        fields = ['text', 'photo']
+        fields = ['title','text', 'photo']
         
 class UserRegistrationForm(UserCreationForm):
     email = forms.EmailField(required=True)
@@ -23,3 +24,8 @@ class UsernameForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ['username']
+
+class OrderForm(forms.ModelForm):
+    class Meta:
+        model = Order
+        fields = ['name', 'phone', 'pin', 'address']

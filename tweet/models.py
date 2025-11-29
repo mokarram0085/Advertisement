@@ -6,6 +6,7 @@ from django.dispatch import receiver
 
 class Tweet(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    title = models.CharField(max_length=50, blank=True, null=True)
     text = models.TextField(max_length=500)
     photo = models.ImageField(upload_to='photos/', blank=True, null=True)
     created_at = models.DateField(auto_now=True)
@@ -54,3 +55,17 @@ def create_user_profile(sender, instance, created, **kwargs):
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
     instance.userprofile.save()
+
+class Order(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    tweet = models.ForeignKey(Tweet, on_delete=models.CASCADE)
+
+    name = models.CharField(max_length=200)
+    phone = models.CharField(max_length=20)
+    pin = models.CharField(max_length=10)
+    address = models.TextField()
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username}"

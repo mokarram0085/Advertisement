@@ -1,0 +1,176 @@
+{% extends "layout.html" %}
+{% load static %}
+
+{% block content %}
+
+<style>
+/* ---------------- BACK BUTTON ---------------- */
+.back-btn-outside {
+    position: fixed;
+    top: 100px;
+    left: 40px;
+    z-index: 9999;
+}
+
+.back-btn-outside a {
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-weight: 500;
+    background: white;
+    border: 1px solid #ccc;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    transition: 0.2s;
+}
+
+.back-btn-outside a:hover {
+    transform: translateX(-4px);
+    background: #f1f1f1;
+}
+
+/* ---------------- MAIN CARD STYLING ---------------- */
+.card {
+    border-radius: 18px !important;
+    overflow: hidden;
+    border: none;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.12) !important;
+}
+
+.card-img-top {
+    height: 320px;
+    object-fit: cover;
+}
+
+/* ---------------- TEXT STYLING ---------------- */
+.card-body h3 {
+    font-weight: 800;
+}
+
+.card-body p.text-muted {
+    font-size: 14px;
+    margin-top: -5px;
+}
+
+.card-body h5 {
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.6;
+}
+
+/* ---------------- GENERAL BUTTON STYLING ---------------- */
+.card-body .btn {
+    border-radius: 10px !important;
+    padding: 6px 14px !important;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.card-body .btn:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+    transition: 0.2s;
+}
+
+/* ---------------- ACTION BUTTONS SECTION ---------------- */
+.btn-row {
+    display: flex;
+    justify-content: space-between;  /* equal spacing */
+    align-items: center;
+    margin-top: 15px;
+    gap: 12px;
+}
+
+.btn-row .btn {
+    flex: 1;   /* make all buttons equal width */
+    padding: 10px 0 !important; /* equal height */
+    text-align: center;
+}
+
+/* ---------------- EDIT / DELETE BUTTONS ---------------- */
+.edit-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 25px;
+}
+
+.edit-row .btn {
+    flex: 1;
+    padding: 10px 0 !important;
+    text-align: center;
+}
+</style>
+
+
+<!-- 🔙 BACK BUTTON -->
+<div class="back-btn-outside">
+    <a href="{% url 'tweet_list' %}" class="btn btn-outline-secondary">⬅ Back</a>
+</div>
+
+<div class="container mt-5">
+
+    <div class="card mx-auto shadow" style="max-width: 650px;">
+
+        {% if tweet.photo %}
+        <img src="{{ tweet.photo.url }}" class="card-img-top" alt="">
+        {% endif %}
+
+        <div class="card-body">
+
+            <h3>{{ tweet.user.username }}</h3>
+            <h4>{{ tweet.title }}</h4>
+            <p class="text-muted">{{ tweet.created_at }}</p>
+
+            <h5 class="mt-3">{{ tweet.text }}</h5>
+
+            <hr>
+
+            <!-- BUTTONS GROUP -->
+            <div class="btn-row">
+
+                <!-- LIKE BUTTON -->
+                <a href="{% url 'like_tweet' tweet.id %}" class="btn btn-primary btn-sm">
+                    👍 Like ({{ tweet.likes.count }})
+                </a>
+
+                <!-- COMMENTS -->
+                <a href="{% url 'view_comments' tweet.id %}" class="btn btn-secondary btn-sm">
+                    💬 Comments ({{ tweet.comments.count }})
+                </a>
+
+                <!-- SHARE -->
+                <button class="btn btn-dark btn-sm"
+                        onclick="sharePost('{{ request.build_absolute_uri }}')">
+                    🔗 Share
+                </button>
+
+                <!-- ORDER NOW -->
+                <a href="{% url 'order_now' tweet.id %}" class="btn btn-success btn-sm">
+                    🛒 Order Now
+                </a>
+
+            </div>
+
+            {% if tweet.user == user %}
+            <div class="edit-row">
+                <a href="{% url 'tweet_edit' tweet.id %}" class="btn btn-warning btn-sm">✏ Edit</a>
+                <a href="{% url 'tweet_delete' tweet.id %}" class="btn btn-danger btn-sm">🗑 Delete</a>
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+
+</div>
+
+<script>
+function sharePost(url) {
+    if (navigator.share) {
+        navigator.share({ title: "Check this Ad", url: url });
+    } else {
+        navigator.clipboard.writeText(url);
+        alert("Link copied!");
+    }
+}
+</script>
+
+{% endblock %}
