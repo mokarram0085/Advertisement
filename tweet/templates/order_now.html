@@ -133,21 +133,21 @@ body {
 
 <!-- 🔙 BACK BUTTON -->
 <div class="back-btn-outside">
-    <a href="{% url 'tweet_detail' order.id %}" class="btn btn-outline-secondary">⬅ Back</a>
+    <a href="{% url 'tweet_detail' tweet.id %}" class="btn btn-outline-secondary">⬅ Back</a>
 </div>
 
 <div class="main-card">
 
     <!-- Card Preview -->
     <div class="tweet-card-inner">
-        {% if order.photo %}
-            <img class="tweet-image" src="{{ order.photo.url }}">
+        {% if tweet.photo %}
+            <img class="tweet-image" src="{{ tweet.photo.url }}">
         {% endif %}
 
         <div class="tweet-card-body-inner">
-            <h5 class="tweet-username">{{ order.user.username }}</h5>
-            <h4 class="tweet-username">{{ order.title }}</h4>
-            <p class="tweet-text">{{ order.text }}</p>
+            <h5 class="tweet-username">{{ tweet.user.username }}</h5>
+            <h4 class="tweet-username">{{ tweet.title }}</h4>
+            <p class="tweet-text">{{ tweet.text }}</p>
         </div>
     </div>
 

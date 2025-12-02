@@ -136,3 +136,10 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]  #Folder where static file
 LOGIN_URL= '/accounts/login/'  #If someone tries to open /tweet/ without logging in, Django redirects them to /accounts/login.
 LOGIN_REDIRECT_URL='/'  #After successfully logging in, Django sends the user to this URL.
 LOGOUT_REDIRECT_URL='/' #After loggout, Django redirects the user to /tweet/.
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = "mydjangoaddtest123@gmail.com"
+EMAIL_HOST_PASSWORD = "azaz gxtm teyt gvxa"

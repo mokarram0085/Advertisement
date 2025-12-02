@@ -128,15 +128,23 @@
             <div class="btn-row">
 
                 <!-- LIKE BUTTON -->
-                <a href="{% url 'like_tweet' tweet.id %}" class="btn btn-primary btn-sm">
-                    👍 Like ({{ tweet.likes.count }})
-                </a>
+                {% if tweet.id in liked_tweets %}
+                    <a href="{% url 'like_tweet' tweet.id %}" class="btn btn-danger btn-sm">Dislike</a>
+                {% else %}
+                    <a href="{% url 'like_tweet' tweet.id %}" class="btn btn-primary btn-sm">Like</a>
+                {% endif %}
 
+                <!-- LIKE COUNT -->
+                <span class="badge bg-info text-dark">
+                    {{ tweet.likes.count }} Likes
+                </span>
+                
                 <!-- COMMENTS -->
+                {% if order.tweet.user == user %}
                 <a href="{% url 'view_comments' tweet.id %}" class="btn btn-secondary btn-sm">
                     💬 Comments ({{ tweet.comments.count }})
                 </a>
-
+                {% endif %}
                 <!-- SHARE -->
                 <button class="btn btn-dark btn-sm"
                         onclick="sharePost('{{ request.build_absolute_uri }}')">

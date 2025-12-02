@@ -6,6 +6,7 @@ from django.dispatch import receiver
 
 class Tweet(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    phone = models.CharField(max_length=20, blank=True, null=True)
     title = models.CharField(max_length=50, blank=True, null=True)
     text = models.TextField(max_length=500)
     photo = models.ImageField(upload_to='photos/', blank=True, null=True)

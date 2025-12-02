@@ -7,20 +7,27 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.models import User
 
 from .models import Tweet, Like, Comment,Order
-from .forms import TweetForm,UserRegistrationForm,ProfilePicForm,UsernameForm,OrderForm
+from .forms import TweetForm,UserRegistrationForm,ProfilePicForm,UsernameForm
 
 from django.http import HttpResponseForbidden
 from django.contrib import messages
+
+from django.core.mail import send_mail
+from django.conf import settings
+
+
 
 
 def About_Us(request):
     return render(request,'About_Us.html')
 
+
 def tweet_list(request):
     query = (request.GET.get("q", "")).strip()
 
     if query:
-        tweets = Tweet.objects.filter(Q(text__icontains=query)|Q(user__username__icontains=query)).order_by('-created_at')
+        tweets = Tweet.objects.filter(Q(text__icontains=query)|Q(user__username__icontains=query)|
+                                      Q(title__icontains=query)).order_by('-created_at')
     else:
         tweets = Tweet.objects.all().order_by('-created_at')
 
@@ -60,7 +67,7 @@ def like_tweet(request, tweet_id):
         Like.objects.create(tweet=tweet, session_id=session_id)  # LIKE
 
 # 🔥 Redirect back to the same page(url)
-    return redirect(request.META.get('HTTP_REFERER', 'tweet_list'))
+    return redirect(request.META.get('HTTP_REFERER'))
 
 
 def comment_tweet(request, tweet_id):
@@ -103,6 +110,7 @@ def view_comments(request, tweet_id):
         "liked": liked  
     })
 
+
 @login_required
 def edit_comment(request, comment_id):
     comment = get_object_or_404(Comment, id=comment_id)
@@ -118,6 +126,7 @@ def edit_comment(request, comment_id):
         return redirect("view_comments", tweet_id=comment.tweet.id)
     return render(request, "edit_comment.html", {"comment": comment})
 
+
 @login_required
 def delete_comment(request, comment_id):
     comment = get_object_or_404(Comment, id=comment_id)
@@ -128,6 +137,7 @@ def delete_comment(request, comment_id):
     tweet_id = comment.tweet.id
     comment.delete()
     return redirect("view_comments", tweet_id=tweet_id)
+
 
 @login_required
 def tweet_create(request):
@@ -141,6 +151,7 @@ def tweet_create(request):
     else:
         form=TweetForm()
     return render(request,'tweet_form.html',{'form':form})
+
 
 @login_required
 def tweet_edit(request,tweet_id):
@@ -156,6 +167,7 @@ def tweet_edit(request,tweet_id):
         form=TweetForm(instance=tweet)
     return render(request,'tweet_form.html',{'form':form})
 
+
 @login_required
 def tweet_delete(request,tweet_id):
     tweet=get_object_or_404(Tweet,pk=tweet_id,user=request.user)
@@ -163,6 +175,7 @@ def tweet_delete(request,tweet_id):
         tweet.delete()
         return redirect('tweet_list')
     return render(request,'tweet_confirm_delete.html',{'tweet':tweet})
+
 
 def register(request):
     if request.method == "POST":
@@ -174,7 +187,6 @@ def register(request):
     else:
         form = UserRegistrationForm()
     return render(request, 'registration/register.html', {'form': form})
-
 
 
 @login_required
@@ -208,6 +220,7 @@ def edit_profile_pic(request):
 
     return render(request, 'edit_profile_pic.html', {'form': form})
 
+
 @login_required
 def edit_username(request):
     if request.method == "POST":
@@ -233,6 +246,7 @@ def edit_password(request):
 
     return render(request, 'edit_password.html', {'form': form})
 
+
 def view_user_profile(request, user_id):
     user_obj = get_object_or_404(User, id=user_id)
     tweets = Tweet.objects.filter(user=user_obj).order_by('-created_at')
@@ -251,10 +265,21 @@ def view_user_profile(request, user_id):
         'liked_tweets': liked_tweets,
     })
 
+
 # Open one tweet
 def tweet_detail(request, id):
+    
+    # --- Likes work ---
+    session_id = request.session.session_key
+    if not session_id:
+        request.session.create()
+        session_id = request.session.session_key
+
+    liked_tweets = Like.objects.filter(session_id=session_id).values_list('tweet_id', flat=True)
+
     tweet = get_object_or_404(Tweet, id=id)
-    return render(request, 'tweet_detail.html', {'tweet': tweet})
+    return render(request, 'tweet_detail.html', {'tweet': tweet,'liked_tweets': liked_tweets})
+
 
 #order_now
 @login_required
@@ -262,10 +287,10 @@ def order_now(request, tweet_id):
     tweet = get_object_or_404(Tweet, id=tweet_id)
 
     if request.method == "POST":
-        name = request.POST.get("name")
-        phone = request.POST.get("phone")
-        pin = request.POST.get("pin")
-        address = request.POST.get("address")
+        name = request.POST["name"]
+        phone = request.POST["phone"]
+        pin = request.POST["pin"]
+        address = request.POST["address"]
 
         order = Order.objects.create(
             user=request.user,
@@ -276,9 +301,33 @@ def order_now(request, tweet_id):
             address=address
         )
 
-        return redirect("order_success", order_id=order.id)
+        #EMAIL SYSTEM 
+        buyer_email = request.user.email
+        seller_email = tweet.user.email
 
-    return render(request, "order_now.html", {"order": tweet})
+        # Email to Buyer
+        send_mail(
+            subject="Order Confirmation",
+            message=f"Your order for '{tweet.title}' is confirmed.\n\n"
+                    f"Order Details:\n"
+                    f"Name: {name}\nPhone: {phone}\nAddress: {address}",
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=[buyer_email],
+            fail_silently=True
+        )
+
+        # Email to Seller
+        send_mail(
+            subject="New Order Received",
+            message=f"You received a new order for your product '{tweet.title}'.\n\n"
+                    f"Buyer Details:\nName: {name}\nPhone: {phone}\nAddress: {address}",
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=[seller_email],
+            fail_silently=True
+        )
+
+        return redirect("order_success", order_id=order.id)
+    return render(request, "order_now.html", {"tweet": tweet})
 
 
 def order_success(request, order_id):
@@ -286,8 +335,33 @@ def order_success(request, order_id):
     return render(request, 'order_success.html', {"order": order})
 
 
+@login_required
+def selling_orders(request):
+    selling_order = Order.objects.select_related('user', 'tweet') \
+        .filter(tweet__user=request.user) \
+        .order_by('-created_at')
+
+    return render(request, 'selling_orders.html', {'selling_order': selling_order})
+
 
 @login_required
-def all_orders(request):
-    orders = Order.objects.select_related('user', 'tweet').order_by('-created_at')
-    return render(request, 'all_orders.html', {'orders': orders})
+def buying_orders(request):
+    buying_order = Order.objects.select_related('user', 'tweet') \
+        .filter(user=request.user) \
+        .order_by('-created_at')
+
+    return render(request, 'buying_orders.html', {'buying_order': buying_order})
+
+
+@login_required
+def buying_orders_delete(request,order_id):
+    orders_list=get_object_or_404(Order, id=order_id)
+    orders_list.delete()
+    return redirect(request.META.get('HTTP_REFERER'))
+
+
+@login_required
+def selling_orders_delete(request,order_id):
+    orders_list=get_object_or_404(Order, id=order_id)
+    orders_list.delete()
+    return redirect(request.META.get('HTTP_REFERER'))

@@ -35,7 +35,10 @@ urlpatterns = [
     # order URLs
     path('order_now/<int:tweet_id>/', views.order_now, name='order_now'),
     path("order_success/<int:order_id>/", views.order_success, name="order_success"),
-    path('all_orders/', views.all_orders, name='all_orders'),
-
-
+    path('selling_orders/', views.selling_orders, name='selling_orders'),
+    path('buying_orders/', views.buying_orders, name='buying_orders'),
+    
+    # Delete orders history(list)
+    path('buying_orders/<int:order_id>/delete/', views.buying_orders_delete, name='buying_orders_delete'),
+    path('selling_orders/<int:order_id>/delete/', views.selling_orders_delete, name='selling_orders_delete'),
 ]
